@@ -145,8 +145,11 @@ export default class User extends React.Component {
       <div class="p-4 sm:ml-64">
         <Sidebar />
         <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+          <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+              Daftar User
           <form>
-            <div class="flex">
+            <div class="flex mt-3">
               <label
                 for="search-dropdown"
                 class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
@@ -221,7 +224,7 @@ export default class User extends React.Component {
                   type="search"
                   id="search-dropdown"
                   class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
-                  placeholder="Search Mockups, Logos, Design Templates..."
+                  // placeholder="Search Mockups, Logos, Design Templates..."
                   required
                 />
                 <button
@@ -248,9 +251,6 @@ export default class User extends React.Component {
               </div>
             </div>
           </form>
-          <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-              Daftar User
             </caption>
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
