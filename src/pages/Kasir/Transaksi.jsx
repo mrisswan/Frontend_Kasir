@@ -10,6 +10,7 @@ export default class Transaksi extends React.Component {
     this.state = {
       menu: [],
       meja: [],
+      menus: [],
       action: "",
       token: "",
       id_transaksi: 0,
@@ -20,21 +21,23 @@ export default class Transaksi extends React.Component {
       status: "",
       jenis_pesanan: "",
       cart: [],
-      id_menu: [],
-      qty: [],
+      total: [],
     };
-    if (localStorage.getItem("token")) {
+    let user = JSON.parse(localStorage.getItem('user'))
+    if (localStorage.getItem("token") && user.role == "kasir") {
       this.state.token = localStorage.getItem("token");
     } else {
       window.location = "/";
     }
   }
+  
   headerConfig = () => {
     let header = {
       headers: { Authorization: `Bearer ${this.state.token}` },
     };
     return header;
   };
+
   getMenu = () => {
     let url = "http://localhost:4040/cafe/menu/";
     axios
@@ -54,46 +57,8 @@ export default class Transaksi extends React.Component {
       });
   };
 
-  getTransaksi = () => {
-    let url = "http://localhost:4040/cafe/transaksi";
-    axios
-      .get(url, this.headerConfig())
-      .then((response) => {
-        this.setState({ transaksi: response.data.data });
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status) {
-            window.alert(error.response.data.message);
-            window.location = "/";
-          }
-        } else {
-          console.log(error);
-        }
-      });
-  };
-
-  getUser = () => {
-    let url = "http://localhost:4040/cafe/user";
-    axios
-      .get(url, this.headerConfig())
-      .then((response) => {
-        this.setState({ user: response.data.data });
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status) {
-            window.alert(error.response.data.message);
-            window.location = "/";
-          }
-        } else {
-          console.log(error);
-        }
-      });
-  };
-
   getMeja = () => {
-    let url = "http://localhost:4040/cafe/meja";
+    let url = "http://localhost:4040/cafe/meja/status/tersedia";
     axios
       .get(url, this.headerConfig())
       .then((response) => {
@@ -122,39 +87,26 @@ export default class Transaksi extends React.Component {
       nama_pelanggan: "",
       status: "belum_bayar",
       jenis_pesanan: "",
-      action: "insert",
     });
   };
-  AddDetail = (value, index) => {
+  AddDetail = (value) => {
     axios
       .get(
         "http://localhost:4040/cafe/menu/" + value.id_menu,
         this.headerConfig()
       )
       .then((res) => {
-        console.log(res.data.data);
-        console.log("id menu: " + this.state.menu[index].id_menu);
-        console.log("index: " + index);
-        console.log("panjang cart: " + this.state.cart.length);
-        // const keranjang ={
-        //     id_menu: value.id_menu,
-        //     qty: 1
-        // }
-        // this.setState({
-        //     cart: keranjang
-        // })
-        // for (let i = 0; i < menus.length; i++) {
         if (this.state.cart.length === 0) {
           const keranjang = {
             id_menu: value.id_menu,
             qty: 1,
           };
           this.state.cart.push(keranjang);
+          this.state.menus.push(res.data.data);
         } else if (
           this.state.cart.find((item) => item.id_menu === value.id_menu)
         ) {
-          let i = index;
-          this.state.cart[i].qty += 1;
+          this.state.cart.find((item) => item.id_menu === value.id_menu).qty++;
         } else if (
           this.state.cart.find((item) => item.id_menu !== value.id_menu)
         ) {
@@ -163,21 +115,80 @@ export default class Transaksi extends React.Component {
             qty: 1,
           };
           this.state.cart.push(keranjang);
+          this.state.menus.push(res.data.data);
         }
-        console.log(this.state.cart);
-        // }
+        // const menuId = value.id_menu; // id menu yang dicari
+        // const order = this.state.cart.find(order => order.id_menu === menuId);// mencari objek dengan id menu yang dicari
+        // const qty = order.qty;
+        // this.setState({
+        //     qty: qty
+        // })
+        this.setState({
+          cart: this.state.cart,
+          menus: this.state.menus,
+        });
       })
       .catch((error) => console.log(error));
   };
 
-  Edit = (selectedItem) => {
-    $("#modal_transaksi").show();
-    this.setState({
-      action: "update",
-      id_transaksi: selectedItem.id_transaksi,
-      status: selectedItem.status,
-    });
+  handleMinus = (value) => {
+    axios
+      .get(
+        "http://localhost:4040/cafe/menu/" + value.id_menu,
+        this.headerConfig()
+      )
+
+      .then((res) => {
+        let i = this.state.cart.indexOf();
+        let a = this.state.menus.indexOf();
+        if (this.state.cart.length === 0) {
+          window.alert("Belum ada yang dipesan");
+        } else if (
+          this.state.cart.find((item) => item.id_menu === value.id_menu)
+        ) {
+          if (this.state.cart.find((item) => item.qty > 0)) {
+            this.state.cart.find((item) => item.id_menu === value.id_menu)
+              .qty--;
+          } else {
+            window.alert("Belum ada yang dipesan");
+          }
+        } else if (
+          this.state.cart.find((item) => item.id_menu !== value.id_menu)
+        ) {
+          window.alert("Belum ada yang dipesan");
+        }
+        this.state.cart.find((item) => item.qty === 0)
+          ? this.state.cart.splice(i) && this.state.menus.splice(a)
+          : console.log("lanjut");
+        console.log(this.state.cart);
+        this.setState({
+          cart: this.state.cart,
+          menus: this.state.menus,
+        });
+      })
+      .catch((error) => console.log(error));
   };
+
+  getQty(itemId) {
+    const item = this.state.cart.find((item) => item.id_menu === itemId);
+    return item ? item.qty : 0;
+  }
+  getHarga(itemId) {
+    const item = this.state.cart.find((item) => item.id_menu === itemId);
+    const menu = this.state.menus.find((item) => item.id_menu === itemId);
+    return item ? menu.harga * item.qty : 0;
+  }
+  // getTotalBayar(itemId) {
+  //     var item = []
+  //     item.push(this.state.cart.find((item) => item.id_menu === itemId))
+  //     var menu = []
+  //     menu.push(this.state.menus.find((item) => item.id_menu === itemId))
+  //     var totalBayar = 0
+  //     for (var i = 0; i < item.length; i++) {
+  //         totalBayar += menu[i].harga * item[i].qty
+  //     }
+  //     return totalBayar
+  // }
   saveTransaksi = (event) => {
     event.preventDefault();
     $("#modal_transaksi").show();
@@ -191,18 +202,32 @@ export default class Transaksi extends React.Component {
       jenis_pesanan: this.state.jenis_pesanan,
       detail_transaksi: this.state.cart,
     };
+    let data = {
+      id_meja: this.state.id_meja,
+      status_meja: "tidak_tersedia",
+    };
     let url = "http://localhost:4040/cafe/transaksi";
-    if (this.state.action === "insert") {
-      axios.post(url, sendData, this.headerConfig()).then((response) => {
-        window.alert(response.data.message);
-        this.setState({ transaksi: response.data.data });
-      });
-    } else if (this.state.action === "update") {
+    if (this.state.jenis_pesanan === "ditempat") {
       axios
-        .put(url, sendData, this.headerConfig())
+        .post(url, sendData, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
-          this.getTransaksi();
+          axios.put(
+            "http://localhost:4040/cafe/meja/",
+            data,
+            this.headerConfig()
+          );
+          window.location = "/kasir/riwayat";
+          this.getMenu();
+        })
+        .catch((error) => console.log(error));
+    } else if (this.state.jenis_pesanan === "dibungkus") {
+      axios
+        .post(url, sendData, this.headerConfig())
+        .then((response) => {
+          window.alert(response.data.message);
+          window.location = "/kasir/riwayat";
+          this.getMenu();
         })
         .catch((error) => console.log(error));
     }
@@ -216,7 +241,7 @@ export default class Transaksi extends React.Component {
         .delete(url, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
-          this.getUser();
+          this.getMenu();
         })
         .catch((error) => console.log(error));
     }
@@ -269,8 +294,8 @@ export default class Transaksi extends React.Component {
       <div class="p-4 sm:ml-64">
         <Sidebar />
         <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-          <div class=" relative overflow-x-auto shadow-md sm:rounded-lg m-2">
-            <h2 className="dark:text-white mb-6 text-xl font-sans ml-3 mt-1">
+          <div class=" relative overflow-x-auto shadow-md sm:rounded-lg m-2 ">
+            <h2 className="dark:text-black mb-6 text-xl font-sans ml-3 mt-1">
               Daftar Menu
               <button
                 className="hover:bg-green-500 float-right mr-3 bg-green-600 text-white font-bold uppercase text-xs px-4 py-3 rounded-md shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
@@ -281,10 +306,10 @@ export default class Transaksi extends React.Component {
               </button>
             </h2>
             <div className="grid grid-cols-4">
-              {this.state.menu.map((item, index) => (
+              {this.state.menu.map((item) => (
                 <div
                   class="max-w-sm bg-white border m-3 border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-                  key={index}
+                  key={item.id_menu}
                 >
                   <img
                     class="rounded-t-lg"
@@ -295,6 +320,9 @@ export default class Transaksi extends React.Component {
                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                       {item.nama_menu}
                     </h5>
+                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                      ID Menu: {item.id_menu}
+                    </p>
                     <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
                       Jenis: {item.jenis}
                     </p>
@@ -307,6 +335,7 @@ export default class Transaksi extends React.Component {
 
                     <button
                       type="button"
+                      onClick={() => this.handleMinus(item)}
                       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >
                       <HiOutlineMinus>
@@ -315,7 +344,7 @@ export default class Transaksi extends React.Component {
                     </button>
                     <button
                       type="button"
-                      onClick={() => this.AddDetail(item, index)}
+                      onClick={() => this.AddDetail(item)}
                       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >
                       <HiOutlinePlus>
@@ -324,7 +353,7 @@ export default class Transaksi extends React.Component {
                     </button>
                     <div class="relative float-right inline-flex items-center justify-center w-10 h-10 overflow-hidden rounded-full bg-gray-700">
                       <span class="font-medium text-gray-200 ">
-                        {this.state.qty[index]}
+                        {this.getQty(item.id_menu)}
                       </span>
                     </div>
                   </div>
@@ -341,7 +370,7 @@ export default class Transaksi extends React.Component {
           class="overflow-x-auto fixed top-0 left-0 right-0 z-50 hidden w-full p-4 md:inset-0 h-modal md:h-full bg-tranparent bg-black bg-opacity-50"
         >
           <div class="flex lg:h-auto w-auto justify-center ">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-1/3">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-auto">
               <button
                 type="button"
                 class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
@@ -363,11 +392,53 @@ export default class Transaksi extends React.Component {
                 <span class="sr-only">Tutup modal</span>
               </button>
               <div class="px-6 py-6 lg:px-8">
-                <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                  transaksi
+                <h3 class="text-xl font-medium text-gray-900 dark:text-white">
+                  Pemesanan
                 </h3>
+                <div class="space-y-6">
+                  {/* {this.state.menus.map((item,index) => (
+                                        <div className="px-6 py-4" key={index}>
+                                            Total Bayar: {this.convertToRupiah(this.getTotalBayar(item.id_menu))}
+                                        </div>
+                                    ))} */}
+                  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-gray-400">
+                      <tr>
+                        <th scope="col" class="px-6 py-3">
+                          Nama Menu
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                          Harga
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                          qty
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.state.menus.map((item) => (
+                        <tr
+                          class="bg-white border-b font-sans dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                          key={item.id_menu}
+                        >
+                          <td class="px-6 py-4">{item.nama_menu}</td>
+                          <td class="px-6 py-4">
+                            {this.convertToRupiah(item.harga)}
+                          </td>
+                          <td class="px-6 py-4">{this.getQty(item.id_menu)}</td>
+                          <td class="px-6 py-4">
+                            {this.convertToRupiah(this.getHarga(item.id_menu))}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 <form
-                  class="space-y-6"
+                  class="space-y-6 mt-6"
                   onSubmit={(event) => this.saveTransaksi(event)}
                 >
                   <div>

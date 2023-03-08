@@ -16,8 +16,12 @@ export default class User extends React.Component {
       username: "",
       password: "",
       fillpassword: true,
+      // searchValue: "",
+      // filteredData: [],
+      // query: "",
     };
-    if (localStorage.getItem("token")) {
+    let user = JSON.parse(localStorage.getItem('user'))
+    if (localStorage.getItem("token") && user.role == "admin") {
       this.state.token = localStorage.getItem("token");
     } else {
       window.location = "/";
@@ -29,6 +33,7 @@ export default class User extends React.Component {
     };
     return header;
   };
+
   getUser = () => {
     $("#dropdown").hide();
     let url = "http://localhost:4040/cafe/user";
@@ -130,12 +135,23 @@ export default class User extends React.Component {
         .catch((error) => console.log(error));
     }
   };
+
   bind = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
   componentDidMount() {
     this.getUser();
   }
+
+  status = () => {
+    var x = document.getElementById("dropdown");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  };
+
   close = () => {
     $("#modal_user").hide();
   };
@@ -148,6 +164,50 @@ export default class User extends React.Component {
           <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
               Daftar User
+              <button
+                className="hover:bg-green-500 float-right bg-green-600 text-white font-bold uppercase text-xs px-4 py-3 mb-2 rounded-md shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
+                type="button"
+                onClick={() => this.Add()}
+              >
+                Tambah Petugas
+              </button>
+              <form>
+                <div class="flex mt-3">
+                  <div class="relative">
+                    <input
+                      type="search"
+                      // value={this.state.query}
+                      // onChange={this.handleInputChange}
+                      id="search-dropdown"
+                      class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
+                      placeholder="Search Nama..."
+                      required
+                    />
+                    {/* <div>{this.searchDatabase()}</div> */}
+                    <button
+                      type="submit"
+                      class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path>
+                      </svg>
+                      <span class="sr-only">Search</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
             </caption>
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
@@ -157,11 +217,83 @@ export default class User extends React.Component {
                 <th scope="col" class="px-6 py-3">
                   Username
                 </th>
-                <th scope="col" class="px-6 py-3">
+                <th scope="col" class="px-6 py-3 flex items-center">
                   Jabatan
+                  <a href="#" onClick={() => this.status()} id="ikon1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-3 h-3 ml-1"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 320 512"
+                    >
+                      <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="#"
+                    onClick={() => this.statusTutup()}
+                    id="ikon2"
+                    className="hidden"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-3 h-3 ml-1"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 320 512"
+                    >
+                      <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                    </svg>
+                  </a>
                 </th>
+                <div
+                  id="dropdown"
+                  class="z-10 hidden fixed bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                >
+                  <ul
+                    class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                    aria-labelledby="dropdownDefaultButton"
+                  >
+                    <li>
+                      <a
+                        href="#"
+                        onClick={() => this.getUser()}
+                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      >
+                        Tampilkan Semua
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        onClick={() => this.getUserStatus("manajer")}
+                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      >
+                        Manajer
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        onClick={() => this.getUserStatus("admin")}
+                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      >
+                        Admin
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="#"
+                        onClick={() => this.getUserStatus("kasir")}
+                        class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      >
+                        Kasir
+                      </a>
+                    </li>
+                  </ul>
+                </div>
                 <th scope="col" class="px-6 py-3">
-                  <span class="sr-only">Edit</span>
                   <span class="sr-only">Edit</span>
                 </th>
               </tr>
@@ -186,7 +318,7 @@ export default class User extends React.Component {
                     <a
                       href="#"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                      onClick={() => this.dropUser(item)}
+                      onClick={() => this.dropMeja(item)}
                     >
                       Hapus
                     </a>
@@ -194,6 +326,60 @@ export default class User extends React.Component {
                 </tr>
               ))}
             </tbody>
+
+            <div class="flex flex-col items-center">
+              {/* <!-- Help text --> */}
+              <span class="text-sm text-gray-700 dark:text-black-400">
+                Showing{" "}
+                <span class="font-semibold text-gray-900 dark:text-black">
+                  1
+                </span>{" "}
+                to{" "}
+                <span class="font-semibold text-gray-900 dark:text-black">
+                  10
+                </span>{" "}
+                of{" "}
+                <span class="font-semibold text-gray-900 dark:text-black">
+                  100
+                </span>{" "}
+                Entries
+              </span>
+              <div class="inline-flex mt-2 xs:mt-0">
+                {/* <!-- Buttons --> */}
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  <svg
+                    aria-hidden="true"
+                    class="w-5 h-5 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  Prev
+                </button>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  Next
+                  <svg
+                    aria-hidden="true"
+                    class="w-5 h-5 ml-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </table>
           {/* Modal */}
           <div

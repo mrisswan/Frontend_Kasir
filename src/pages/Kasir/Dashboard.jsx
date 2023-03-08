@@ -6,9 +6,10 @@ import Sidebar from "./Sidebar";
 export default class Dashboard extends React.Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+    };
     let user = JSON.parse(localStorage.getItem('user'))
-    if (localStorage.getItem("token") && user.role == "admin") {
+    if (localStorage.getItem("token") && user.role == "kasir") {
       this.state.token = localStorage.getItem("token");
     } else {
       window.location = "/";

@@ -7,8 +7,8 @@ export default class Dashboard extends React.Component {
   constructor() {
     super();
     this.state = {};
-    let user = JSON.parse(localStorage.getItem('user'))
-    if (localStorage.getItem("token") && user.role == "admin") {
+    let user = JSON.parse(localStorage.getItem("user"));
+    if (localStorage.getItem("token") && user.role == "manajer") {
       this.state.token = localStorage.getItem("token");
     } else {
       window.location = "/";

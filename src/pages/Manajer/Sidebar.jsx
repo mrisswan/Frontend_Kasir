@@ -18,7 +18,7 @@ export default class Sidebar extends React.Component {
             <ul class="space-y-2">
               <li>
                 <a
-                  href="/manajer/manajer"
+                  href="/manajer/dashboard"
                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <svg
@@ -34,9 +34,9 @@ export default class Sidebar extends React.Component {
                   <span class="ml-3">Dashboard</span>
                 </a>
               </li>
-              {/* <li>
+              <li>
                 <a
-                  href="/manajer/meja"
+                  href="/manajer/manajer"
                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <svg
@@ -48,12 +48,12 @@ export default class Sidebar extends React.Component {
                   >
                     <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                   </svg>
-                  <span class="flex-1 ml-3 whitespace-nowrap">Daftar Meja</span>
+                  <span class="flex-1 ml-3 whitespace-nowrap">Data Penjualan</span>
                 </a>
-              </li> */}
+              </li>
               <li>
                 <a
-                  href="/manajer/user"
+                  href="/manajer/penjualan"
                   class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <svg
@@ -70,7 +70,7 @@ export default class Sidebar extends React.Component {
                     ></path>
                   </svg>
                   <span class="flex-1 ml-3 whitespace-nowrap">
-                    Daftar Petugas
+                    Daftar Penjualan
                   </span>
                 </a>
               </li>

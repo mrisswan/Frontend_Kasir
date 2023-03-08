@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 import Sidebar from "./Sidebar";
 import axios from "axios";
+// import $ from "jquery";
 
 export default class Manajer extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       data: [],
       options: {
@@ -18,7 +18,20 @@ export default class Manajer extends React.Component {
         },
       },
     };
+    let user = JSON.parse(localStorage.getItem('user'))
+    if (localStorage.getItem("token") && user.role == "manajer") {
+      this.state.token = localStorage.getItem("token");
+    } else {
+      window.location = "/";
+    }
   }
+
+  headerConfig = () => {
+    let header = {
+      headers: { Authorization: `Bearer ${this.state.token}` },
+    };
+    return header;
+  };
 
   componentDidMount() {
     axios
