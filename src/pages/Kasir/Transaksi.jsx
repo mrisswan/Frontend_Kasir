@@ -8,7 +8,9 @@ export default class Transaksi extends React.Component {
   constructor() {
     super();
     this.state = {
-      menu: [],
+      makanan: [],
+      minuman: [],
+      // menu: [],
       meja: [],
       menus: [],
       action: "",
@@ -21,16 +23,17 @@ export default class Transaksi extends React.Component {
       status: "",
       jenis_pesanan: "",
       cart: [],
-      total: [],
+      totalBayar: 0,
     };
-    let user = JSON.parse(localStorage.getItem('user'))
+    let user = JSON.parse(localStorage.getItem("user"));
     if (localStorage.getItem("token") && user.role == "kasir") {
       this.state.token = localStorage.getItem("token");
     } else {
+      window.alert("Maaf, anda tiddak terdaftar sebagai kasir:(");
       window.location = "/";
     }
   }
-  
+
   headerConfig = () => {
     let header = {
       headers: { Authorization: `Bearer ${this.state.token}` },
@@ -38,12 +41,31 @@ export default class Transaksi extends React.Component {
     return header;
   };
 
-  getMenu = () => {
-    let url = "http://localhost:4040/cafe/menu/";
+  getMakanan = () => {
+    let url = "http://localhost:4040/cafe/menu/jenis/makanan";
     axios
       .get(url, this.headerConfig())
       .then((response) => {
-        this.setState({ menu: response.data.data });
+        this.setState({ makanan: response.data.data });
+      })
+      .catch((error) => {
+        if (error.response) {
+          if (error.response.status) {
+            window.alert(error.response.data.message);
+            window.location = "/";
+          }
+        } else {
+          console.log(error);
+        }
+      });
+  };
+
+  getMinuman = () => {
+    let url = "http://localhost:4040/cafe/menu/jenis/minuman";
+    axios
+      .get(url, this.headerConfig())
+      .then((response) => {
+        this.setState({ minuman: response.data.data });
       })
       .catch((error) => {
         if (error.response) {
@@ -103,10 +125,18 @@ export default class Transaksi extends React.Component {
           };
           this.state.cart.push(keranjang);
           this.state.menus.push(res.data.data);
+          var harga1 = this.state.menus.find(
+            (item) => item.id_menu === value.id_menu
+          ).harga;
+          this.setState({ totalBayar: harga1 });
         } else if (
           this.state.cart.find((item) => item.id_menu === value.id_menu)
         ) {
           this.state.cart.find((item) => item.id_menu === value.id_menu).qty++;
+          var harga2 = this.state.menus.find(
+            (item) => item.id_menu === value.id_menu
+          ).harga;
+          this.setState({ totalBayar: this.state.totalBayar + harga2 });
         } else if (
           this.state.cart.find((item) => item.id_menu !== value.id_menu)
         ) {
@@ -116,17 +146,16 @@ export default class Transaksi extends React.Component {
           };
           this.state.cart.push(keranjang);
           this.state.menus.push(res.data.data);
+          var harga = this.state.menus.find(
+            (item) => item.id_menu === value.id_menu
+          ).harga;
+          this.setState({ totalBayar: this.state.totalBayar + harga });
         }
-        // const menuId = value.id_menu; // id menu yang dicari
-        // const order = this.state.cart.find(order => order.id_menu === menuId);// mencari objek dengan id menu yang dicari
-        // const qty = order.qty;
-        // this.setState({
-        //     qty: qty
-        // })
         this.setState({
           cart: this.state.cart,
           menus: this.state.menus,
         });
+        console.log(this.state.menus);
       })
       .catch((error) => console.log(error));
   };
@@ -178,25 +207,25 @@ export default class Transaksi extends React.Component {
     const menu = this.state.menus.find((item) => item.id_menu === itemId);
     return item ? menu.harga * item.qty : 0;
   }
-  // getTotalBayar(itemId) {
-  //     var item = []
-  //     item.push(this.state.cart.find((item) => item.id_menu === itemId))
-  //     var menu = []
-  //     menu.push(this.state.menus.find((item) => item.id_menu === itemId))
-  //     var totalBayar = 0
-  //     for (var i = 0; i < item.length; i++) {
-  //         totalBayar += menu[i].harga * item[i].qty
-  //     }
-  //     return totalBayar
-  // }
+
   saveTransaksi = (event) => {
     event.preventDefault();
     $("#modal_transaksi").show();
-    let sendData = {
+    let sendDataDitempat = {
       id_transaksi: this.state.id_transaksi,
       tgl_transaksi: this.state.tgl_transaksi,
       id_user: this.state.id_user,
       id_meja: this.state.id_meja,
+      nama_pelanggan: this.state.nama_pelanggan,
+      status: this.state.status,
+      jenis_pesanan: this.state.jenis_pesanan,
+      detail_transaksi: this.state.cart,
+    };
+    let sendDataBungkus = {
+      id_transaksi: this.state.id_transaksi,
+      tgl_transaksi: this.state.tgl_transaksi,
+      id_user: this.state.id_user,
+      id_meja: null,
       nama_pelanggan: this.state.nama_pelanggan,
       status: this.state.status,
       jenis_pesanan: this.state.jenis_pesanan,
@@ -209,7 +238,7 @@ export default class Transaksi extends React.Component {
     let url = "http://localhost:4040/cafe/transaksi";
     if (this.state.jenis_pesanan === "ditempat") {
       axios
-        .post(url, sendData, this.headerConfig())
+        .post(url, sendDataDitempat, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
           axios.put(
@@ -221,9 +250,9 @@ export default class Transaksi extends React.Component {
           this.getMenu();
         })
         .catch((error) => console.log(error));
-    } else if (this.state.jenis_pesanan === "dibungkus") {
+    } else if (this.state.jenis_pesanan === "bungkus") {
       axios
-        .post(url, sendData, this.headerConfig())
+        .post(url, sendDataBungkus, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
           window.location = "/kasir/riwayat";
@@ -249,14 +278,15 @@ export default class Transaksi extends React.Component {
   bind = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
+
   componentDidMount() {
-    this.getMenu();
+    this.getMakanan();
+    this.getMinuman();
     this.getMeja();
   }
   close = () => {
     $("#modal_transaksi").hide();
   };
-
   convertToRupiah(number) {
     if (number) {
       var rupiah = "";
@@ -288,6 +318,14 @@ export default class Transaksi extends React.Component {
       return number;
     }
   }
+  //mengedit adar nomor meja tidak tampil saat customer "dibungkus"
+  nomorMejaShow = () => {
+    if (this.state.jenis_pesanan === "ditempat") {
+      $("#meja").show();
+    } else {
+      $("#meja").hide();
+    }
+  };
 
   render() {
     return (
@@ -305,8 +343,11 @@ export default class Transaksi extends React.Component {
                 Pesan
               </button>
             </h2>
+            <h2 className="dark:text-white mt-2 text-xl font-serif ml-3">
+              Daftar Minuman
+            </h2>
             <div className="grid grid-cols-4">
-              {this.state.menu.map((item) => (
+              {this.state.minuman.map((item) => (
                 <div
                   class="max-w-sm bg-white border m-3 border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
                   key={item.id_menu}
@@ -321,8 +362,60 @@ export default class Transaksi extends React.Component {
                       {item.nama_menu}
                     </h5>
                     <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                      ID Menu: {item.id_menu}
+                      Jenis: {item.jenis}
                     </p>
+                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                      Deskripsi: {item.deskripsi}
+                    </p>
+                    <p class="mb-6 font-normal text-gray-700 dark:text-gray-400">
+                      Harga: {this.convertToRupiah(item.harga)}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => this.handleMinus(item)}
+                      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                      <HiOutlineMinus>
+                        <span class="sr-only">Kurang</span>
+                      </HiOutlineMinus>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => this.AddDetail(item)}
+                      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >
+                      <HiOutlinePlus>
+                        <span class="sr-only">Tambah</span>
+                      </HiOutlinePlus>
+                    </button>
+                    <div class="relative float-right inline-flex items-center justify-center w-10 h-10 overflow-hidden rounded-full bg-gray-700">
+                      <span class="font-medium text-gray-200 ">
+                        {this.getQty(item.id_menu)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <h2 className="dark:text-white mt-2 text-xl font-serif ml-3">
+              Daftar Makanan
+            </h2>
+            <div className="grid grid-cols-4">
+              {this.state.makanan.map((item) => (
+                <div
+                  class="max-w-sm bg-white border m-3 border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+                  key={item.id_menu}
+                >
+                  <img
+                    class="rounded-t-lg"
+                    src={`http://localhost:4040/img/${item.gambar}`}
+                    alt="gambar"
+                  />
+                  <div class="p-5">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                      {item.nama_menu}
+                    </h5>
                     <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
                       Jenis: {item.jenis}
                     </p>
@@ -393,14 +486,9 @@ export default class Transaksi extends React.Component {
               </button>
               <div class="px-6 py-6 lg:px-8">
                 <h3 class="text-xl font-medium text-gray-900 dark:text-white">
-                  Pemesanan
+                  transaksi
                 </h3>
                 <div class="space-y-6">
-                  {/* {this.state.menus.map((item,index) => (
-                                        <div className="px-6 py-4" key={index}>
-                                            Total Bayar: {this.convertToRupiah(this.getTotalBayar(item.id_menu))}
-                                        </div>
-                                    ))} */}
                   <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-gray-400">
                       <tr>
@@ -411,10 +499,10 @@ export default class Transaksi extends React.Component {
                           Harga
                         </th>
                         <th scope="col" class="px-6 py-3">
-                          qty
+                          Jumlah
                         </th>
                         <th scope="col" class="px-6 py-3">
-                          Total
+                          Total Harga
                         </th>
                       </tr>
                     </thead>
@@ -436,6 +524,11 @@ export default class Transaksi extends React.Component {
                       ))}
                     </tbody>
                   </table>
+                  <div className="bg-gray-100 p-2 border-2 hover:bg-gray-200">
+                    <p className="font-sans text-gray-700">
+                      Total Bayar: {this.convertToRupiah(this.state.totalBayar)}
+                    </p>
+                  </div>
                 </div>
                 <form
                   class="space-y-6 mt-6"
@@ -467,6 +560,7 @@ export default class Transaksi extends React.Component {
                       Jenis Pesanan
                     </label>
                     <select
+                      onClick={() => this.nomorMejaShow()}
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                       placeholder="Jenis Pesanan"
                       name="jenis_pesanan"
@@ -476,11 +570,11 @@ export default class Transaksi extends React.Component {
                     >
                       <option value="">Pilih Jenis Pesanan</option>
                       <option value="ditempat">Makan Ditempat</option>
-                      <option value="dibungkus">Dibungkus</option>
+                      <option value="bungkus">Dibungkus</option>
                     </select>
                   </div>
 
-                  <div>
+                  <div className="hidden modal" aria-hidden="true" id="meja">
                     <label
                       for="jenis"
                       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -493,7 +587,6 @@ export default class Transaksi extends React.Component {
                       name="id_meja"
                       value={this.state.id_meja}
                       onChange={this.bind}
-                      required
                     >
                       <option value="">Pilih Meja</option>
                       {this.state.meja.map((item) => (

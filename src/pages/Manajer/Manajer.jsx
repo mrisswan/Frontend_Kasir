@@ -18,10 +18,11 @@ export default class Manajer extends React.Component {
         },
       },
     };
-    let user = JSON.parse(localStorage.getItem('user'))
+    let user = JSON.parse(localStorage.getItem("user"));
     if (localStorage.getItem("token") && user.role == "manajer") {
       this.state.token = localStorage.getItem("token");
     } else {
+      window.alert("Anda tidak terdaftar sebagai manajer");
       window.location = "/";
     }
   }
@@ -59,6 +60,9 @@ export default class Manajer extends React.Component {
                   fontSize: "15px",
                 },
               },
+            },
+            fill: {
+              colors: "#1F2937",
             },
           },
         });

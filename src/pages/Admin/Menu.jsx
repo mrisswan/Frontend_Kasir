@@ -18,7 +18,7 @@ export default class Menu extends React.Component {
       gambar: null,
       harga: "",
     };
-    let user = JSON.parse(localStorage.getItem('user'))
+    let user = JSON.parse(localStorage.getItem("user"));
     if (localStorage.getItem("token") && user.role == "admin") {
       this.state.token = localStorage.getItem("token");
     } else {
@@ -32,25 +32,6 @@ export default class Menu extends React.Component {
     };
     return header;
   };
-
-  // getMenu = () => {
-  //   let url = "http://localhost:4040/cafe/menu/";
-  //   axios
-  //     .get(url, this.headerConfig())
-  //     .then((response) => {
-  //       this.setState({ menu: response.data.data });
-  //     })
-  //     .catch((error) => {
-  //       if (error.response) {
-  //         if (error.response.status) {
-  //           window.alert(error.response.data.message);
-  //           window.location = "/";
-  //         }
-  //       } else {
-  //         console.log(error);
-  //       }
-  //     });
-  // };
 
   getMakanan = () => {
     let url = "http://localhost:4040/cafe/menu/jenis/makanan";
@@ -268,7 +249,7 @@ export default class Menu extends React.Component {
                 </div>
               ))}
             </div>
-            <h2 className="dark:text-white mt-2 text-xl font-serif ml-3">
+            <h2 className="dark:text-black mt-2 text-xl font-serif ml-3">
               Daftar Makanan
             </h2>
             <div className="grid grid-cols-4">

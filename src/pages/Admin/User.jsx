@@ -15,12 +15,10 @@ export default class User extends React.Component {
       role: "",
       username: "",
       password: "",
+      transaksi: [],
       fillpassword: true,
-      // searchValue: "",
-      // filteredData: [],
-      // query: "",
     };
-    let user = JSON.parse(localStorage.getItem('user'))
+    let user = JSON.parse(localStorage.getItem("user"));
     if (localStorage.getItem("token") && user.role == "admin") {
       this.state.token = localStorage.getItem("token");
     } else {
@@ -74,6 +72,28 @@ export default class User extends React.Component {
       });
   };
 
+  //filtering
+  getTransaksiUser = (event) => {
+    event.preventDefault();
+    let url =
+      "http://localhost:4040/cafe/transaksi/user/" + this.state.nama_user;
+    axios
+      .get(url, this.headerConfig())
+      .then((response) => {
+        this.setState({ transaksi: response.data.data });
+      })
+      .catch((error) => {
+        if (error.response) {
+          if (error.response.status) {
+            window.alert(error.response.data.message);
+            window.location = "/";
+          }
+        } else {
+          console.log(error);
+        }
+      });
+  };
+
   Add = () => {
     $("#modal_user").show();
     this.setState({
@@ -96,6 +116,7 @@ export default class User extends React.Component {
       username: selectedItem.username,
     });
   };
+
   saveUser = (event) => {
     event.preventDefault();
     $("#modal_user").show();
@@ -161,53 +182,53 @@ export default class User extends React.Component {
       <div class="p-4 sm:ml-64">
         <Sidebar />
         <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+          <form
+            className="sm:w-1/2"
+            onSubmit={(event) => this.getTransaksiUser(event)}
+          >
+            <label
+              htmlFor="search"
+              className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
+            >
+              Cari
+            </label>
+            <div className="relative w-96">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5 text-gray-500 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="search"
+                id="search"
+                className="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Cari dengan nama petugas"
+                name="nama_user"
+                onChange={this.bind}
+              />
+              <button
+                type="submit"
+                className="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Cari
+              </button>
+            </div>
+          </form>
           <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
               Daftar User
-              <button
-                className="hover:bg-green-500 float-right bg-green-600 text-white font-bold uppercase text-xs px-4 py-3 mb-2 rounded-md shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
-                type="button"
-                onClick={() => this.Add()}
-              >
-                Tambah Petugas
-              </button>
-              <form>
-                <div class="flex mt-3">
-                  <div class="relative">
-                    <input
-                      type="search"
-                      // value={this.state.query}
-                      // onChange={this.handleInputChange}
-                      id="search-dropdown"
-                      class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
-                      placeholder="Search Nama..."
-                      required
-                    />
-                    {/* <div>{this.searchDatabase()}</div> */}
-                    <button
-                      type="submit"
-                      class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        ></path>
-                      </svg>
-                      <span class="sr-only">Search</span>
-                    </button>
-                  </div>
-                </div>
-              </form>
             </caption>
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
@@ -318,7 +339,7 @@ export default class User extends React.Component {
                     <a
                       href="#"
                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                      onClick={() => this.dropMeja(item)}
+                      onClick={() => this.dropUser(item)}
                     >
                       Hapus
                     </a>
@@ -326,60 +347,6 @@ export default class User extends React.Component {
                 </tr>
               ))}
             </tbody>
-
-            <div class="flex flex-col items-center">
-              {/* <!-- Help text --> */}
-              <span class="text-sm text-gray-700 dark:text-black-400">
-                Showing{" "}
-                <span class="font-semibold text-gray-900 dark:text-black">
-                  1
-                </span>{" "}
-                to{" "}
-                <span class="font-semibold text-gray-900 dark:text-black">
-                  10
-                </span>{" "}
-                of{" "}
-                <span class="font-semibold text-gray-900 dark:text-black">
-                  100
-                </span>{" "}
-                Entries
-              </span>
-              <div class="inline-flex mt-2 xs:mt-0">
-                {/* <!-- Buttons --> */}
-                <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  <svg
-                    aria-hidden="true"
-                    class="w-5 h-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                  Prev
-                </button>
-                <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  Next
-                  <svg
-                    aria-hidden="true"
-                    class="w-5 h-5 ml-2"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                      clip-rule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
           </table>
           {/* Modal */}
           <div

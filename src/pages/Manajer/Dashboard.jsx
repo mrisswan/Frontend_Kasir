@@ -11,6 +11,7 @@ export default class Dashboard extends React.Component {
     if (localStorage.getItem("token") && user.role == "manajer") {
       this.state.token = localStorage.getItem("token");
     } else {
+      window.alert("Anda tidak terdaftar sebagai manajer");
       window.location = "/";
     }
   }
