@@ -54,45 +54,83 @@ export default class User extends React.Component {
 
   getTransaksiUser = (event) => {
     event.preventDefault();
-    let url =
-      "http://localhost:4040/cafe/transaksi/user/" + this.state.nama_user;
-    axios
-      .get(url, this.headerConfig())
-      .then((response) => {
-        this.setState({ transaksi: response.data.data });
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status) {
-            window.alert(error.response.data.message);
-            window.location = "/";
+    if (this.state.nama_user === "") {
+      let url = "http://localhost:4040/cafe/transaksi/";
+      axios
+        .get(url, this.headerConfig())
+        .then((response) => {
+          this.setState({ transaksi: response.data.data });
+        })
+        .catch((error) => {
+          if (error.response) {
+            if (error.response.status) {
+              window.alert(error.response.data.message);
+              window.location = "/";
+            }
+          } else {
+            console.log(error);
           }
-        } else {
-          console.log(error);
-        }
-      });
+        });
+    } else {
+      let url =
+        "http://localhost:4040/cafe/transaksi/user/" + this.state.nama_user;
+      axios
+        .get(url, this.headerConfig())
+        .then((response) => {
+          this.setState({ transaksi: response.data.data });
+        })
+        .catch((error) => {
+          if (error.response) {
+            if (error.response.status) {
+              window.alert(error.response.data.message);
+              window.location = "/";
+            }
+          } else {
+            console.log(error);
+          }
+        });
+    }
   };
 
   getTransaksiTanggal = (event) => {
     event.preventDefault();
-    let url = `http://localhost:4040/cafe/transaksi/tanggal/${this.timeAwal(
-      this.state.awal
-    )}/${this.timeAkhir(this.state.akhir)}`;
-    axios
-      .get(url, this.headerConfig())
-      .then((response) => {
-        this.setState({ transaksi: response.data.data });
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status) {
-            window.alert(error.response.data.message);
-            window.location = "/";
+    if (this.state.awal === "" || this.state.akhir === "") {
+      let url = "http://localhost:4040/cafe/transaksi/";
+      axios
+        .get(url, this.headerConfig())
+        .then((response) => {
+          this.setState({ transaksi: response.data.data });
+        })
+        .catch((error) => {
+          if (error.response) {
+            if (error.response.status) {
+              window.alert(error.response.data.message);
+              window.location = "/";
+            }
+          } else {
+            console.log(error);
           }
-        } else {
-          console.log(error);
-        }
-      });
+        });
+    } else {
+      let url = `http://localhost:4040/cafe/transaksi/tanggal/${this.timeAwal(
+        this.state.awal
+      )}/${this.timeAkhir(this.state.akhir)}`;
+      axios
+        .get(url, this.headerConfig())
+        .then((response) => {
+          this.setState({ transaksi: response.data.data });
+        })
+        .catch((error) => {
+          if (error.response) {
+            if (error.response.status) {
+              window.alert(error.response.data.message);
+              window.location = "/";
+            }
+          } else {
+            console.log(error);
+          }
+        });
+    }
   };
 
   getDetail = (selectedItem) => {
@@ -166,14 +204,13 @@ export default class User extends React.Component {
     axios
       .get("http://localhost:4040/cafe/transaksi/detail/", this.headerConfig())
       .then((response) => {
-        this.setState({detail: response.data.data})
+        this.setState({ detail: response.data.data });
         for (let i = 0; i < response.data.data.length; i++) {
           var harga = response.data.data[i].menu.harga;
           var qty = response.data.data[i].qty;
           var subTotal = harga * qty;
           this.state.pendapatan = this.state.pendapatan + subTotal;
         }
-        
       })
       .catch((error) => {
         if (error.response) {

@@ -77,7 +77,6 @@ export default class User extends React.Component {
         }
       });
   };
-
   AddDetail = (value) => {
     axios
       .get(
@@ -87,33 +86,35 @@ export default class User extends React.Component {
       .then((res) => {
         if (this.state.cart.length === 0) {
           const keranjang = {
+            id_transaksi: this.state.id_transaksi,
             id_menu: value.id_menu,
             qty: 1,
           };
           this.state.cart.push(keranjang);
           this.state.menus.push(res.data.data);
-          var harga1 = this.state.menus.find(
+          let harga = this.state.menus.find(
             (item) => item.id_menu === value.id_menu
           ).harga;
-          this.setState({ totalBayar: harga1 });
+          this.setState({ totalBayar: harga });
         } else if (
           this.state.cart.find((item) => item.id_menu === value.id_menu)
         ) {
           this.state.cart.find((item) => item.id_menu === value.id_menu).qty++;
-          var harga2 = this.state.menus.find(
+          let harga = this.state.menus.find(
             (item) => item.id_menu === value.id_menu
           ).harga;
-          this.setState({ totalBayar: this.state.totalBayar + harga2 });
+          this.setState({ totalBayar: this.state.totalBayar + harga });
         } else if (
           this.state.cart.find((item) => item.id_menu !== value.id_menu)
         ) {
           const keranjang = {
+            id_transaksi: this.state.id_transaksi,
             id_menu: value.id_menu,
             qty: 1,
           };
           this.state.cart.push(keranjang);
           this.state.menus.push(res.data.data);
-          var harga = this.state.menus.find(
+          let harga = this.state.menus.find(
             (item) => item.id_menu === value.id_menu
           ).harga;
           this.setState({ totalBayar: this.state.totalBayar + harga });
@@ -122,7 +123,6 @@ export default class User extends React.Component {
           cart: this.state.cart,
           menus: this.state.menus,
         });
-        console.log(this.state.menus);
       })
       .catch((error) => console.log(error));
   };
@@ -239,6 +239,15 @@ export default class User extends React.Component {
       });
   };
 
+  // getNama = () => {
+  //     let user = JSON.parse(localStorage.getItem('user'))
+  //     if(user.nama_user !== null){
+  //         return user.nama_user
+  //     }else{
+  //         return "tidak ada"
+  //     }
+  // }
+
   getTransaksiLunas = () => {
     let user = JSON.parse(localStorage.getItem("user"));
     let url =
@@ -295,14 +304,14 @@ export default class User extends React.Component {
     }
   };
 
-  getQty(itemId) {
+  getQtyModal(itemId) {
     const item = this.state.detail_transaksi.find(
       (item) => item.id_menu === itemId
     );
     return item ? item.qty : 0;
   }
 
-  getHarga(itemId) {
+  getHargaModal(itemId) {
     const item = this.state.detail_transaksi.find(
       (item) => item.id_menu === itemId
     );
@@ -350,22 +359,8 @@ export default class User extends React.Component {
       })
       .catch((error) => console.log(error));
   };
+
   pesanLagi = (value) => {
-    // let url = "http://localhost:4040/cafe/transaksi/detail/" + value.id_transaksi
-    // axios.get(url, this.headerConfig())
-    //     .then(response => {
-    //         this.setState({ detail: response.data.data })
-    //     })
-    //     .catch(error => {
-    //         if (error.response) {
-    //             if (error.response.status) {
-    //                 window.alert(error.response.data.message)
-    //                 window.location = '/'
-    //             }
-    //         } else {
-    //             console.log(error);
-    //         }
-    //     })
     $("#tambah").show();
     $("#history").hide();
     this.setState({
@@ -375,6 +370,7 @@ export default class User extends React.Component {
   batalPesan = () => {
     window.location.reload();
   };
+
   componentDidMount() {
     this.getMeja();
     this.getMenu();
@@ -394,6 +390,7 @@ export default class User extends React.Component {
     $("#modal_detail").hide();
     this.state.total = 0;
   };
+
   convertToRupiah(number) {
     if (number) {
       var rupiah = "";
@@ -426,11 +423,11 @@ export default class User extends React.Component {
     }
   }
   closeTransaksi = () => {
-    $("#modal_transaksiBaru").hide();
+    $("#modal_transaksi").hide();
   };
 
   pesananBaru = () => {
-    $("#modal_transaksiBaru").show();
+    $("#modal_transaksi").show();
   };
   simpan = () => {
     let sendData = {
@@ -462,7 +459,7 @@ export default class User extends React.Component {
               <button
                 className="hover:bg-green-500 mr-3 bg-green-600 text-white font-bold uppercase text-xs py-3 px-3 rounded-md shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
                 type="button"
-                onClick={() => this.pesananBaru()}
+                onClick={() => this.simpan()}
               >
                 Pesan
               </button>
@@ -591,7 +588,7 @@ export default class User extends React.Component {
           <div class="relative overflow-x-auto shadow-md sm:rounded-lg m-2">
             <div className="flex justify-between items-center">
               <h2 className="dark:text-black text-xl font-sans ml-3">
-                Riwayat Pemesanan
+                Riwayat transaksi
               </h2>
             </div>
             <br />
@@ -608,7 +605,7 @@ export default class User extends React.Component {
                     Nomor Meja
                   </th>
                   <th scope="col" class="px-6 py-3 ">
-                    Tanggal Pemesanan
+                    Tanggal transaksi
                   </th>
                   <th scope="col" class="px-6 py-3 ">
                     Jenis Pesanan
@@ -668,7 +665,7 @@ export default class User extends React.Component {
                     Nomor Meja
                   </th>
                   <th scope="col" class="px-6 py-3 ">
-                    Tanggal Pemesanan
+                    Tanggal transaksi
                   </th>
                   <th scope="col" class="px-6 py-3 ">
                     Jenis Pesanan
@@ -709,7 +706,7 @@ export default class User extends React.Component {
           class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 md:inset-0 h-modal md:h-full bg-tranparent bg-black bg-opacity-50"
         >
           <div class="flex md:h-auto w-auto justify-center ">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-1/3">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-auto">
               <button
                 type="button"
                 class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
@@ -732,10 +729,10 @@ export default class User extends React.Component {
               </button>
               <div class="px-6 py-6 lg:px-8">
                 <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                  Detail Pemesanan
+                  Detail transaksi
                 </h3>
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-gray-400">
                     <tr>
                       <th scope="col" class="px-6 py-3">
                         Nama Menu
@@ -761,9 +758,13 @@ export default class User extends React.Component {
                         <td class="px-6 py-4">
                           {this.convertToRupiah(item.menu.harga)}
                         </td>
-                        <td class="px-6 py-4">{this.getQty(item.id_menu)}</td>
                         <td class="px-6 py-4">
-                          {this.convertToRupiah(this.getHarga(item.id_menu))}
+                          {this.getQtyModal(item.id_menu)}
+                        </td>
+                        <td class="px-6 py-4">
+                          {this.convertToRupiah(
+                            this.getHargaModal(item.id_menu)
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -771,7 +772,7 @@ export default class User extends React.Component {
                 </table>
                 <div className="bg-gray-100 p-2 border-2 mb-2 hover:bg-gray-200">
                   <p className="font-sans text-gray-700">
-                    Total Bayar: {this.totalBayar()}
+                    Total Bayar: {this.convertToRupiah(this.totalBayar())}
                   </p>
                 </div>
                 {this.state.transaksiBelumBayar.map((item) => (
@@ -785,115 +786,6 @@ export default class User extends React.Component {
                     </button>
                   </div>
                 ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          id="modal_transaksiBaru"
-          tabindex="-1"
-          aria-hidden="true"
-          class="overflow-x-auto fixed top-0 left-0 right-0 z-50 hidden w-full p-4 md:inset-0 h-modal md:h-full bg-tranparent bg-black bg-opacity-50"
-        >
-          <div class="flex lg:h-auto w-auto justify-center ">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-auto">
-              <button
-                type="button"
-                class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
-                onClick={() => this.closeTransaksi()}
-              >
-                <svg
-                  aria-hidden="true"
-                  class="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-                <span class="sr-only">Tutup modal</span>
-              </button>
-              <div class="px-6 py-6 lg:px-8">
-                <h3 class="text-xl font-medium text-gray-900 dark:text-white">
-                  P
-                </h3>
-                <div class="space-y-6">
-                  <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-gray-400">
-                      <tr>
-                        <th scope="col" class="px-6 py-3">
-                          Nama Menu
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Harga
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Jumlah
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                          Total Harga
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {this.state.menus.map((item) => (
-                        <tr
-                          class="bg-white border-b font-sans dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                          key={item.id_menu}
-                        >
-                          <td class="px-6 py-4">{item.nama_menu}</td>
-                          <td class="px-6 py-4">
-                            {this.convertToRupiah(item.harga)}
-                          </td>
-                          <td class="px-6 py-4">{this.getQty(item.id_menu)}</td>
-                          <td class="px-6 py-4">
-                            {this.convertToRupiah(this.getHarga(item.id_menu))}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="bg-gray-100 p-2 border-2 hover:bg-gray-200">
-                    <p className="font-sans text-gray-700">
-                      Total Bayar: {this.convertToRupiah(this.state.totalBayar)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => this.simpan()}
-                  type="submit"
-                  class="mt-2 w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                >
-                  Simpan
-                </button>
-                {/* <form class="space-y-6 mt-6" onSubmit={(event) => this.saveTransaksi(event)}>
-                                    <div>
-                                        <label for="nama_pelanggan" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama Pelanggan</label>
-                                        <input type="text" name="nama_pelanggan" id="nama_pelanggan" value={this.state.nama_pelanggan} onChange={this.bind} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Masukkan nama pelanggan" required />
-                                    </div>
-                                    <div>
-                                        <label for="jenis" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jenis Pesanan</label>
-                                        <select onClick={() => this.nomorMejaShow()} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Jenis Pesanan" name="jenis_pesanan" value={this.state.jenis_pesanan} onChange={this.bind} required>
-                                            <option value=''>Pilih Jenis Pesanan</option>
-                                            <option value="ditempat">Makan Ditempat</option>
-                                            <option value="bungkus">Dibungkus</option>
-                                        </select>
-                                    </div>
-                                    <div className="hidden modal" aria-hidden="true" id="meja">
-                                        <label for="jenis" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Meja</label>
-                                        <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Jenis Pesanan" name="id_meja" value={this.state.id_meja} onChange={this.bind}>
-                                            <option value="">Pilih Meja</option>
-                                            {this.state.meja.map(item => (
-                                                <option value={item.id_meja}>{item.nomor_meja}: {item.status_meja}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Simpan</button>
-                                </form> */}
               </div>
             </div>
           </div>
@@ -962,9 +854,9 @@ export default class User extends React.Component {
                     <td class="px-6 py-4">
                       {this.convertToRupiah(item.menu.harga)}
                     </td>
-                    <td class="px-6 py-4">{this.getQty(item.id_menu)}</td>
+                    <td class="px-6 py-4">{this.getQtyModal(item.id_menu)}</td>
                     <td class="px-6 py-4">
-                      {this.convertToRupiah(this.getHarga(item.id_menu))}
+                      {this.convertToRupiah(this.getHargaModal(item.id_menu))}
                     </td>
                   </tr>
                 ))}

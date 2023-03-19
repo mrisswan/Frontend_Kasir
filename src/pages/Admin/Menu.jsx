@@ -109,14 +109,15 @@ export default class Menu extends React.Component {
     if (this.state.action === "insert") {
       axios.post(url, form, this.headerConfig()).then((response) => {
         window.alert(response.data.message);
-        this.getMenu();
+        window.location.reload();
+        // this.getMenu();
       });
     } else if (this.state.action === "update") {
       axios
         .put(url, form, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
-          this.getMenu();
+          window.location.reload();
         })
         .catch((error) => console.log(error));
     }
@@ -129,7 +130,8 @@ export default class Menu extends React.Component {
         .delete(url, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
-          this.getMenu();
+          window.location.reload();
+          // this.getMenu();
         })
         .catch((error) => console.log(error));
     }

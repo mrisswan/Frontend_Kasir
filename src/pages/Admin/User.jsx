@@ -15,7 +15,6 @@ export default class User extends React.Component {
       role: "",
       username: "",
       password: "",
-      transaksi: [],
       fillpassword: true,
     };
     let user = JSON.parse(localStorage.getItem("user"));
@@ -72,28 +71,6 @@ export default class User extends React.Component {
       });
   };
 
-  //filtering
-  getTransaksiUser = (event) => {
-    event.preventDefault();
-    let url =
-      "http://localhost:4040/cafe/transaksi/user/" + this.state.nama_user;
-    axios
-      .get(url, this.headerConfig())
-      .then((response) => {
-        this.setState({ transaksi: response.data.data });
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status) {
-            window.alert(error.response.data.message);
-            window.location = "/";
-          }
-        } else {
-          console.log(error);
-        }
-      });
-  };
-
   Add = () => {
     $("#modal_user").show();
     this.setState({
@@ -131,6 +108,7 @@ export default class User extends React.Component {
     if (this.state.action === "insert") {
       axios.post(url, sendData, this.headerConfig()).then((response) => {
         window.alert(response.data.message);
+        window.location.reload();
         this.getUser();
       });
     } else if (this.state.action === "update") {
@@ -138,12 +116,14 @@ export default class User extends React.Component {
         .put(url, sendData, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
+          window.location.reload();
           this.getUser();
         })
         .catch((error) => console.log(error));
     }
     $("#modal_user").hide();
   };
+
   dropUser = (selectedItem) => {
     if (window.confirm("Apakah anda yakin ingin menghapus data ini?")) {
       let url = "http://localhost:4040/cafe/user/" + selectedItem.id_user;
@@ -151,19 +131,18 @@ export default class User extends React.Component {
         .delete(url, this.headerConfig())
         .then((response) => {
           window.alert(response.data.message);
+          window.location.reload();
           this.getUser();
         })
         .catch((error) => console.log(error));
     }
   };
-
   bind = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
   componentDidMount() {
     this.getUser();
   }
-
   status = () => {
     var x = document.getElementById("dropdown");
     if (x.style.display === "none") {
@@ -172,63 +151,24 @@ export default class User extends React.Component {
       x.style.display = "none";
     }
   };
-
   close = () => {
     $("#modal_user").hide();
   };
-
   render() {
     return (
       <div class="p-4 sm:ml-64">
         <Sidebar />
         <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-          <form
-            className="sm:w-1/2"
-            onSubmit={(event) => this.getTransaksiUser(event)}
-          >
-            <label
-              htmlFor="search"
-              className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
-            >
-              Cari
-            </label>
-            <div className="relative w-96">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5 text-gray-500 dark:text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-              <input
-                type="search"
-                id="search"
-                className="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Cari dengan nama petugas"
-                name="nama_user"
-                onChange={this.bind}
-              />
-              <button
-                type="submit"
-                className="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-              >
-                Cari
-              </button>
-            </div>
-          </form>
           <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
               Daftar User
+              <button
+                className="hover:bg-green-500 float-right bg-green-600 text-white font-bold uppercase text-xs px-4 py-3 mb-2 rounded-md shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150"
+                type="button"
+                onClick={() => this.Add()}
+              >
+                Tambah User
+              </button>
             </caption>
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
